@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>오늘의 요리 룰렛</title>
+
+<style>
+body {
+    text-align: center;
+    font-family: Arial;
+    background-color: #f4f4f4;
+    margin-top: 100px;
+}
+
+button {
+    font-size: 24px;
+    padding: 15px 40px;
+    cursor: pointer;
+}
+
+#result {
+    font-size: 48px;
+    margin-top: 30px;
+    font-weight: bold;
+    color: #e74c3c;
+}
+</style>
+
+</head>
+<body>
+
+<h1>🍳 오늘의 요리 룰렛</h1>
+
+<button onclick="spin()">룰렛 돌리기</button>
+
+<div id="result">메뉴를 뽑아주세요</div>
+
+<script>
+
+const foods = [
+"김치찌개",
+"제육볶음",
+"파스타",
+"카레",
+"닭볶음탕",
+"오므라이스",
+"샤브샤브",
+"스테이크",
+"부타나베",
+"찜닭"
+];
+
+function spin() {
+
+    let count = 0;
+
+    const interval = setInterval(() => {
+
+        const random = Math.floor(Math.random() * foods.length);
+
+        document.getElementById("result").innerText = foods[random];
+
+        count++;
+
+        if(count > 20) {
+            clearInterval(interval);
+        }
+
+    }, 100);
+
+}
+
+</script>
+
+</body>
+</html>
