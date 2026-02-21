@@ -2,14 +2,14 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>요리 카지노 룰렛</title>
+<title>카지노 요리 룰렛</title>
 
 <style>
 body {
+    background: radial-gradient(circle, #0f2027, #203a43, #2c5364);
+    color: white;
     text-align: center;
     font-family: Arial;
-    background: #1a1a1a;
-    color: white;
 }
 
 h1 {
@@ -17,39 +17,59 @@ h1 {
 }
 
 #wheel {
-    margin-top: 30px;
-    border: 8px solid white;
+    margin-top: 20px;
     border-radius: 50%;
+    border: 10px solid white;
     background: white;
 }
 
 #spinBtn {
     margin-top: 20px;
     font-size: 24px;
-    padding: 10px 30px;
+    padding: 12px 40px;
     cursor: pointer;
+    background: gold;
+    border: none;
+    font-weight: bold;
 }
 
 #result {
     margin-top: 20px;
-    font-size: 36px;
+    font-size: 42px;
     color: gold;
     font-weight: bold;
+}
+
+.flash {
+    animation: flash 0.3s infinite alternate;
+}
+
+@keyframes flash {
+    from { color: gold; }
+    to { color: white; }
 }
 </style>
 
 </head>
 <body>
 
-<h1>🎡 요리 카지노 룰렛</h1>
+<h1>🎡 카지노 요리 룰렛</h1>
 
 <canvas id="wheel" width="500" height="500"></canvas>
 
 <br>
 
-<button id="spinBtn">돌리기</button>
+<button id="spinBtn">SPIN</button>
 
-<div id="result">버튼을 눌러 운명을 확인하세요</div>
+<div id="result">SPIN 버튼을 누르세요</div>
+
+<audio id="spinSound">
+<source src="https://assets.mixkit.co/active_storage/sfx/2003/2003-preview.mp3">
+</audio>
+
+<audio id="winSound">
+<source src="https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3">
+</audio>
 
 <script>
 
@@ -384,91 +404,134 @@ let spinning = false;
 
 function drawWheel() {
 
+    ctx.clearRect(0,0,500,500);
+
     const arc = 2 * Math.PI / foods.length;
 
-    for(let i = 0; i < foods.length; i++) {
+    for(let i=0;i<foods.length;i++){
 
         ctx.beginPath();
 
-        ctx.fillStyle = i % 2 === 0 ? "#e74c3c" : "#3498db";
+        ctx.fillStyle = i%2==0 ? "#e74c3c" : "#3498db";
 
-        ctx.moveTo(center, center);
+        ctx.moveTo(center,center);
 
-        ctx.arc(center, center, radius, angle + i * arc, angle + (i+1) * arc);
+        ctx.arc(center,center,radius,angle+i*arc,angle+(i+1)*arc);
 
         ctx.fill();
 
         ctx.save();
 
-        ctx.translate(center, center);
+        ctx.translate(center,center);
 
-        ctx.rotate(angle + i * arc + arc / 2);
+        ctx.rotate(angle+i*arc+arc/2);
 
-        ctx.fillStyle = "white";
+        ctx.fillStyle="white";
 
-        ctx.font = "16px Arial";
+        ctx.font="18px Arial";
 
-        ctx.fillText(foods[i], radius / 2, 5);
+        ctx.fillText(foods[i],radius*0.5,5);
 
         ctx.restore();
-
     }
 
-    // pointer
-    ctx.beginPath();
-    ctx.fillStyle = "gold";
-    ctx.moveTo(center - 10, 10);
-    ctx.lineTo(center + 10, 10);
-    ctx.lineTo(center, 40);
-    ctx.fill();
-
+    drawPointer();
 }
 
-function spin() {
+function drawPointer(){
+
+    ctx.save();
+
+    ctx.translate(center,center);
+
+    ctx.rotate(-Math.PI/6); // 30도 각도
+
+    ctx.beginPath();
+
+    ctx.fillStyle="gold";
+
+    ctx.moveTo(0,-radius-10);
+
+    ctx.lineTo(-20,-radius-50);
+
+    ctx.lineTo(20,-radius-50);
+
+    ctx.fill();
+
+    ctx.restore();
+}
+
+function spin(){
 
     if(spinning) return;
 
-    spinning = true;
+    spinning=true;
 
-    let spinAngle = Math.random() * 0.3 + 0.4;
+    document.getElementById("result").innerText="돌리는 중...";
 
-    let spinTime = 0;
+    document.getElementById("spinSound").play();
 
-    let spinDuration = 4000;
+    let duration=5000;
+    let start=null;
 
-    function animate() {
+    let initialSpeed=Math.random()*0.5+0.6;
 
-        spinTime += 16;
+    function animate(timestamp){
 
-        if(spinTime >= spinDuration) {
+        if(!start) start=timestamp;
 
-            spinning = false;
+        let progress=timestamp-start;
 
-            const arc = 2 * Math.PI / foods.length;
+        let percent=progress/duration;
 
-            const index = Math.floor((2 * Math.PI - angle % (2 * Math.PI)) / arc) % foods.length;
+        let speed=initialSpeed*(1-percent);
 
-            document.getElementById("result").innerText = foods[index];
-
-            return;
-
-        }
-
-        angle += spinAngle * (1 - spinTime / spinDuration);
-
-        ctx.clearRect(0, 0, 500, 500);
+        angle+=speed;
 
         drawWheel();
 
-        requestAnimationFrame(animate);
+        if(progress<duration){
 
+            requestAnimationFrame(animate);
+
+        }else{
+
+            finishSpin();
+        }
     }
 
-    animate();
-
+    requestAnimationFrame(animate);
 }
 
-document.getElementById("spinBtn").onclick = spin;
+function finishSpin(){
+
+    spinning=false;
+
+    document.getElementById("spinSound").pause();
+    document.getElementById("spinSound").currentTime=0;
+
+    const arc=2*Math.PI/foods.length;
+
+    let pointerAngle=(Math.PI*2-angle-Math.PI/6)%(Math.PI*2);
+
+    let index=Math.floor(pointerAngle/arc);
+
+    let selected=foods[index];
+
+    const resultDiv=document.getElementById("result");
+
+    resultDiv.innerText=selected;
+
+    resultDiv.classList.add("flash");
+
+    document.getElementById("winSound").play();
+
+    setTimeout(()=>{
+        resultDiv.classList.remove("flash");
+    },3000);
+}
+
+document.getElementById("spinBtn").onclick=spin;
 
 drawWheel();
 
