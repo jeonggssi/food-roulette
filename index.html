@@ -2,38 +2,54 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>오늘의 요리 룰렛</title>
+<title>요리 카지노 룰렛</title>
 
 <style>
 body {
     text-align: center;
     font-family: Arial;
-    background-color: #f4f4f4;
-    margin-top: 100px;
+    background: #1a1a1a;
+    color: white;
 }
 
-button {
+h1 {
+    margin-top: 20px;
+}
+
+#wheel {
+    margin-top: 30px;
+    border: 8px solid white;
+    border-radius: 50%;
+    background: white;
+}
+
+#spinBtn {
+    margin-top: 20px;
     font-size: 24px;
-    padding: 15px 40px;
+    padding: 10px 30px;
     cursor: pointer;
 }
 
 #result {
-    font-size: 48px;
-    margin-top: 30px;
+    margin-top: 20px;
+    font-size: 36px;
+    color: gold;
     font-weight: bold;
-    color: #e74c3c;
 }
 </style>
 
 </head>
 <body>
 
-<h1>🍳 오늘의 요리 룰렛</h1>
+<h1>🎡 요리 카지노 룰렛</h1>
 
-<button onclick="spin()">룰렛 돌리기</button>
+<canvas id="wheel" width="500" height="500"></canvas>
 
-<div id="result">메뉴를 뽑아주세요</div>
+<br>
+
+<button id="spinBtn">돌리기</button>
+
+<div id="result">버튼을 눌러 운명을 확인하세요</div>
 
 <script>
 
@@ -357,28 +373,106 @@ const foods = [
 "궁보계정"
 ];
 
-function spin() {
+const canvas = document.getElementById("wheel");
+const ctx = canvas.getContext("2d");
 
-    let count = 0;
+const center = 250;
+const radius = 240;
 
-    const interval = setInterval(() => {
+let angle = 0;
+let spinning = false;
 
-        const random = Math.floor(Math.random() * foods.length);
+function drawWheel() {
 
-        document.getElementById("result").innerText = foods[random];
+    const arc = 2 * Math.PI / foods.length;
 
-        count++;
+    for(let i = 0; i < foods.length; i++) {
 
-        if(count > 20) {
-            clearInterval(interval);
-        }
+        ctx.beginPath();
 
-    }, 100);
+        ctx.fillStyle = i % 2 === 0 ? "#e74c3c" : "#3498db";
+
+        ctx.moveTo(center, center);
+
+        ctx.arc(center, center, radius, angle + i * arc, angle + (i+1) * arc);
+
+        ctx.fill();
+
+        ctx.save();
+
+        ctx.translate(center, center);
+
+        ctx.rotate(angle + i * arc + arc / 2);
+
+        ctx.fillStyle = "white";
+
+        ctx.font = "16px Arial";
+
+        ctx.fillText(foods[i], radius / 2, 5);
+
+        ctx.restore();
+
+    }
+
+    // pointer
+    ctx.beginPath();
+    ctx.fillStyle = "gold";
+    ctx.moveTo(center - 10, 10);
+    ctx.lineTo(center + 10, 10);
+    ctx.lineTo(center, 40);
+    ctx.fill();
 
 }
+
+function spin() {
+
+    if(spinning) return;
+
+    spinning = true;
+
+    let spinAngle = Math.random() * 0.3 + 0.4;
+
+    let spinTime = 0;
+
+    let spinDuration = 4000;
+
+    function animate() {
+
+        spinTime += 16;
+
+        if(spinTime >= spinDuration) {
+
+            spinning = false;
+
+            const arc = 2 * Math.PI / foods.length;
+
+            const index = Math.floor((2 * Math.PI - angle % (2 * Math.PI)) / arc) % foods.length;
+
+            document.getElementById("result").innerText = foods[index];
+
+            return;
+
+        }
+
+        angle += spinAngle * (1 - spinTime / spinDuration);
+
+        ctx.clearRect(0, 0, 500, 500);
+
+        drawWheel();
+
+        requestAnimationFrame(animate);
+
+    }
+
+    animate();
+
+}
+
+document.getElementById("spinBtn").onclick = spin;
+
+drawWheel();
 
 </script>
 
 </body>
-
 </html>
