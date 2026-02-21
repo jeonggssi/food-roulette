@@ -415,8 +415,6 @@ extendedMenus.forEach(menu=>{
     list.appendChild(div);
 });
 
-let spinning=false;
-
 function playSpinSound(duration=3500){
     const ctx=new AudioContext();
     const osc=ctx.createOscillator();
@@ -455,10 +453,12 @@ function playWinSound(){
     osc.start();
     osc.stop(ctx.currentTime+1);
 }
-
+    
+let spinning = false;
+ let currentPosition = 0;   
     
 function start(){
-let currentPosition = 0;
+    
     if(spinning) return;
 
     spinning=true;
@@ -466,7 +466,7 @@ let currentPosition = 0;
     playSpinSound(3500);
 
     const itemHeight = 80;
-    const containerHeight = 80;
+    const containerHeight = document.getElementById("roulette-container").offsetHeight;
     const centerOffset = (containerHeight / 2) - (itemHeight / 2);
 
     const total = menus.length;
@@ -506,6 +506,7 @@ let currentPosition = 0;
 
 </body>
 </html>
+
 
 
 
