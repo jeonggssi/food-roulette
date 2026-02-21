@@ -41,20 +41,6 @@ h1 {
     font-size: 28px;
 }
 
-/* 포인터 삼각형 (30도) */
-#pointer {
-    position: absolute;
-    top: -20px;
-    left: 50%;
-    transform: translateX(-50%) rotate(30deg);
-    width: 0;
-    height: 0;
-    border-left: 20px solid transparent;
-    border-right: 20px solid transparent;
-    border-bottom: 40px solid red;
-    z-index: 10;
-}
-
 /* 버튼 */
 button {
     font-size: 24px;
@@ -120,7 +106,7 @@ extendedMenus.forEach(menu=>{
 
 let spinning=false;
 
-function playSpinSound(duration=5000){
+function playSpinSound(duration=3500){
     const ctx=new AudioContext();
     const osc=ctx.createOscillator();
     const gain=ctx.createGain();
@@ -165,7 +151,7 @@ function start(){
 
     spinning=true;
 
-    playSpinSound(5000);
+    playSpinSound(3500);
 
     const itemHeight=80;
     const total=menus.length;
@@ -189,10 +175,11 @@ function start(){
 
         spinning=false;
 
-    },5000);
+    },3500);
 
 }
 </script>
 
 </body>
 </html>
+
