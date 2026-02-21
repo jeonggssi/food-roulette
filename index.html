@@ -62,11 +62,7 @@ button:hover {
     font-size: 44px !important;
     color: gold;
     font-weight: bold;
-    text-shadow:
-        0 0 10px gold,
-        0 0 20px orange,
-        0 0 40px yellow;
-    transform: scale(1.2);
+    text-shadow: 0 0 20px gold,
 }
 </style>
 
@@ -99,7 +95,7 @@ const menus = [
 const list = document.getElementById("menu-list");
 
 let extendedMenus = [];
-for(let i=0;i<50;i++){
+for(let i=0;i<20;i++){
     extendedMenus = extendedMenus.concat(menus);
 }
 
@@ -202,5 +198,6 @@ function start(){
 
 </body>
 </html>
+
 
 
