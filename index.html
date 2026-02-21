@@ -114,7 +114,7 @@ const itemHeight = 80;
 const containerHeight = 80;
     
 /* 밝고 경쾌한 슬롯머신 회전음 */
-function playSpinSound(duration=3500){
+function playSpinSound(duration=5000){
     const ctx=new AudioContext();
     const osc=ctx.createOscillator();
     const gain=ctx.createGain();
@@ -161,7 +161,7 @@ function start(){
 
     spinning=true;
 
-    playSpinSound(duration);
+    playSpinSound(3500);
 
     const randomIndex = Math.floor(Math.random()*menus.length);
 
@@ -198,6 +198,7 @@ function start(){
 
 </body>
 </html>
+
 
 
 
