@@ -174,7 +174,7 @@ function start(){
 
         items.forEach(i=>i.classList.remove("winner"));
 
-        const visualIndex = Math.floor(currentPosition / itemHeight);
+        const visualIndex = Math.floor(currentPosition / itemHeight) % items.length;
 
         items[visualIndex].classList.add("winner");
 
@@ -189,6 +189,7 @@ function start(){
 
 </body>
 </html>
+
 
 
 
