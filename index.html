@@ -20,8 +20,8 @@ h1 {
 
 #roulette-container {
     position: relative;
-    width: 300px;
-    height: 80px;
+    width: 1000px;
+    height: 800px;
     margin: 50px auto;
     overflow: hidden;
     border: 3px solid gold;
@@ -39,6 +39,10 @@ h1 {
     height: 80px;
     line-height: 80px;
     font-size: 28px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* 버튼 */
@@ -462,6 +466,9 @@ let currentPosition = 0;
     playSpinSound(3500);
 
     const itemHeight = 80;
+    const containerHeight = 80;
+    const centerOffset = (containerHeight / 2) - (itemHeight / 2);
+
     const total = menus.length;
 
     const winnerIndex = Math.floor(Math.random()*total);
@@ -473,7 +480,9 @@ let currentPosition = 0;
     currentPosition += moveAmount;
 
     list.style.transition = "transform 3.5s cubic-bezier(.1,.7,.1,1)";
-    list.style.transform = `translateY(-${currentPosition}px)`;
+
+    list.style.transform =
+        `translateY(-${currentPosition - centerOffset}px)`;
 
     setTimeout(()=>{
 
@@ -481,7 +490,8 @@ let currentPosition = 0;
 
         items.forEach(i=>i.classList.remove("winner"));
 
-        const visualIndex = Math.floor(currentPosition / itemHeight) % items.length;
+        const visualIndex =
+            Math.floor(currentPosition / itemHeight) % items.length;
 
         items[visualIndex].classList.add("winner");
 
@@ -496,6 +506,7 @@ let currentPosition = 0;
 
 </body>
 </html>
+
 
 
 
