@@ -456,13 +456,12 @@ function playWinSound(){
 }
     
 let spinning = false;
-    
+    let currentPosition = 0;
 function start(){
-    
- let currentPosition = 0;   
+
     if(spinning) return;
 
-    spinning=true;
+    spinning = true;
 
     playSpinSound(3500);
 
@@ -471,34 +470,41 @@ function start(){
     const centerOffset = (containerHeight / 2) - (itemHeight / 2);
 
     const total = menus.length;
+    const totalItems = document.querySelectorAll(".menu-item").length;
 
-    const winnerIndex = Math.floor(Math.random()*total);
+    const winnerIndex = Math.floor(Math.random() * total);
 
-    const extraSpin = total * 10;
+    // 최소 3바퀴 + 랜덤 0~2바퀴
+    const minLoops = 3;
+    const extraLoops = Math.floor(Math.random() * 3);
 
-    const moveAmount = (winnerIndex + extraSpin) * itemHeight;
+    const moveAmount =
+        (winnerIndex + total * (minLoops + extraLoops)) * itemHeight;
 
     currentPosition += moveAmount;
 
-    list.style.transition = "transform 3.5s cubic-bezier(.1,.7,.1,1)";
+    // ⭐ 핵심: 전체 높이 안에서 순환시킴 (빈칸 방지)
+    const maxHeight = totalItems * itemHeight;
+    currentPosition = currentPosition % maxHeight;
 
+    list.style.transition = "transform 3.5s cubic-bezier(.1,.7,.1,1)";
     list.style.transform =
         `translateY(-${currentPosition - centerOffset}px)`;
 
     setTimeout(()=>{
 
-        const items=document.querySelectorAll(".menu-item");
+        const items = document.querySelectorAll(".menu-item");
 
         items.forEach(i=>i.classList.remove("winner"));
 
         const visualIndex =
-            Math.floor(currentPosition / itemHeight) % items.length;
+            Math.floor(currentPosition / itemHeight) % totalItems;
 
         items[visualIndex].classList.add("winner");
 
         playWinSound();
 
-        spinning=false;
+        spinning = false;
 
     },3500);
 
@@ -507,6 +513,7 @@ function start(){
 
 </body>
 </html>
+
 
 
 
