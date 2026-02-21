@@ -2,522 +2,196 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>카지노 요리 룰렛</title>
+<title>랜덤 요리 뽑기</title>
 
 <style>
-body{
-    background:#0b1d2a;
-    color:white;
-    text-align:center;
-    font-family:Arial;
+body {
+    background: radial-gradient(circle, #1a1a1a, #000);
+    color: white;
+    font-family: Arial;
+    text-align: center;
 }
 
-canvas{
-    margin-top:30px;
+h1 {
+    margin-top: 30px;
+    font-size: 42px;
+    letter-spacing: 3px;
 }
 
-button{
-    margin-top:20px;
-    font-size:24px;
-    padding:12px 40px;
-    background:gold;
-    border:none;
-    cursor:pointer;
-    font-weight:bold;
+#roulette-container {
+    position: relative;
+    width: 300px;
+    height: 80px;
+    margin: 50px auto;
+    overflow: hidden;
+    border: 3px solid gold;
+    border-radius: 10px;
+    background: black;
 }
 
-#result{
-    font-size:42px;
-    margin-top:20px;
-    color:gold;
+/* 메뉴 리스트 */
+#menu-list {
+    position: absolute;
+    width: 100%;
 }
 
-.flash{
-    animation:flash 0.2s infinite alternate;
+.menu-item {
+    height: 80px;
+    line-height: 80px;
+    font-size: 28px;
 }
 
-@keyframes flash{
-    from{color:gold;}
-    to{color:white;}
+/* 포인터 삼각형 (30도) */
+#pointer {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%) rotate(30deg);
+    width: 0;
+    height: 0;
+    border-left: 20px solid transparent;
+    border-right: 20px solid transparent;
+    border-bottom: 40px solid red;
+    z-index: 10;
+}
+
+/* 버튼 */
+button {
+    font-size: 24px;
+    padding: 15px 40px;
+    background: gold;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: orange;
+}
+
+/* 결과 강조 */
+.winner {
+    font-size: 42px !important;
+    color: gold;
+    font-weight: bold;
+    text-shadow: 0 0 20px gold;
 }
 </style>
 
 </head>
 <body>
 
-<h1>🎡 카지노 요리 룰렛</h1>
+<h1>랜덤 요리 뽑기</h1>
 
-<canvas id="canvas" width="500" height="500"></canvas>
+<div id="roulette-container">
+    <div id="pointer"></div>
+    <div id="menu-list"></div>
+</div>
 
-<br>
-<button onclick="spin()">SPIN</button>
-
-<div id="result">SPIN을 누르세요</div>
-
-<audio id="spinSound">
-<source src="https://assets.mixkit.co/active_storage/sfx/2003/2003-preview.mp3">
-</audio>
-
-<audio id="winSound">
-<source src="https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3">
-</audio>
+<button onclick="start()">START</button>
 
 <script>
+const menus = [
+    "김치찌개",
+    "스테이크",
+    "파스타",
+    "초밥",
+    "치킨",
+    "라멘",
+    "삼겹살",
+    "카레",
+    "햄버거",
+    "샤브샤브"
+];
 
-const foods = [
-"차완무시",
-"마파두부",
-"오삼불고기",
-"간장찜닭",
-"가라아게",
-"깐풍기",
-"샤오롱바오",
-"고추잡채",
-"대패삼겹 숙주볶음",
-"일본식 함박스테이크",
-"간장불고기",
-"고추장불고기",
-"돼지불백",
-"제육볶음",
-"닭갈비",
-"숯불닭갈비",
-"닭볶음탕",
-"로제찜닭",
-"돼지고기 김치찜",
-"돼지고기 묵은지찜",
-"갈비찜",
-"매운갈비찜",
-"소꼬리찜",
-"차돌박이 된장찌개",
-"우삼겹 된장찌개",
-"순두부찌개",
-"해물순두부찌개",
-"김치찌개",
-"참치김치찌개",
-"부대찌개",
-"감자탕",
-"뼈해장국",
-"육개장",
-"설렁탕",
-"곰탕",
-"삼계탕",
-"닭곰탕",
-"갈비탕",
-"낙곱새",
-"낙지볶음",
-"쭈꾸미볶음",
-"곱창볶음",
-"막창볶음",
-"대창볶음",
-"소불고기 전골",
-"버섯전골",
-"알탕",
-"동태찌개",
-"고등어 김치조림",
-"갈치조림",
-"코다리조림",
-"닭도리탕",
-"두루치기",
-"오징어볶음",
-"삼겹살 구이",
-"항정살 구이",
-"목살 스테이크",
-"차돌박이 구이",
-"LA갈비",
-"떡볶이 (국물)",
-"즉석떡볶이",
-"로제떡볶이",
-"라볶이",
-"김치볶음밥",
-"삼겹 김치볶음밥",
-"계란말이",
-"치즈계란말이",
-"해물파전",
-"김치전",
-"부추전",
-"녹두전",
-"잡채",
-"간장잡채",
-"불닭볶음",
-"닭강정",
-"고추바사삭",
-"간장게장",
-"양념게장",
-"새우장",
-"전복버터구이",
-"가리비찜",
-"꼬막무침 (윤기형)",
-"차돌 숙주볶음",
-"소고기 무국",
-"매운무국",
-"북어국",
-"콩나물국밥",
-"돼지국밥",
-"순대국",
-"순대볶음",
-"어묵탕",
-"어묵볶음",
-"떡국",
-"만둣국",
-"김치만두전골",
-"만두전",
-"떡갈비",
-"언양식 불고기",
-"숯불돼지갈비",
-"매운돼지갈비",
-"소시지야채볶음",
-"콘치즈",
-"치즈불닭",
-"치즈김치볶음밥",
-"오야코동",
-"규동",
-"가츠동",
-"텐동",
-"돈카츠",
-"히레카츠",
-"난반 가라아게",
-"에비후라이",
-"카레라이스",
-"일본식 카레우동",
-"카레돈",
-"하야시라이스",
-"스키야키",
-"스키야키 우동",
-"샤브샤브",
-"나베 (미소)",
-"나베 (스키야키풍)",
-"부타나베",
-"니쿠자가",
-"연어버터구이",
-"가리비 버터구이",
-"아사리 술찜",
-"고등어 소금구이",
-"고등어 미소조림",
-"사바동",
-"우나기동",
-"텐무스",
-"타마고야키",
-"명란 타마고야키",
-"야키소바",
-"야키우동",
-"오코노미야키",
-"히로시마풍 오코노미야키",
-"타코야키",
-"소고기 스테이크 와후",
-"규 스테이크",
-"부타동",
-"연어덮밥",
-"사케동",
-"가이센동",
-"가츠카레",
-"카레 고로케",
-"고로케",
-"새우고로케",
-"미소라멘",
-"쇼유라멘",
-"탄탄멘 (일식풍)",
-"츠케멘",
-"차슈",
-"차슈덮밥",
-"부타카쿠니",
-"돈부리 스테이크",
-"가리비 나베",
-"키리탄포 나베",
-"규나베",
-"닭나베",
-"모츠나베",
-"야키토리",
-"네기마",
-"츠쿠네",
-"닭껍질구이",
-"가라아게 덮밥",
-"규탄 구이",
-"규탄 정식",
-"데미함박",
-"와후 함박",
-"에비칠리 (일본식)",
-"카니크림 고로케",
-"크림우동",
-"명란크림우동",
-"일본식 나폴리탄",
-"오므라이스",
-"데미 오므라이스",
-"카레 오므라이스",
-"버터라이스",
-"스테이크 덮밥",
-"규카츠",
-"규카츠동",
-"연어 가마구이",
-"방어조림",
-"일본식 조림 햄버그",
-"토리테리야키",
-"데리야키 치킨",
-"데리야키 연어",
-"돈테리야키",
-"규테리야키",
-"이자카야풍 소고기 볶음",
-"일본식 닭조림",
-"미소야키 치킨",
-"미소야키 돼지고기",
-"가츠나베",
-"부타가쿠니동",
-"일본식 떡구이",
-"모찌 치즈구이",
-"야키니쿠",
-"불판 야키니쿠",
-"스키야키풍 볶음",
-"마파가지",
-"어향가지",
-"어향육슬",
-"깐풍새우",
-"유린기",
-"라조기",
-"청경채 마늘볶음",
-"공심채 볶음",
-"중식 볶음밥",
-"새우볶음밥",
-"XO볶음밥",
-"간짜장",
-"짜장면",
-"볶음짜장",
-"짬뽕",
-"볶음짬뽕",
-"마라탕",
-"마라샹궈",
-"마라룽샤",
-"꿔바로우",
-"동파육",
-"홍소육",
-"홍소가지",
-"유산슬",
-"팔보채",
-"칠리새우",
-"칠리새우 크림",
-"사천식 닭볶음",
-"라오즈 지",
-"탄탄면",
-"사천탄탄면",
-"중식 비빔면",
-"볶음면",
-"해물볶음면",
-"중국식 오믈렛",
-"토마토 달걀볶음",
-"부추 달걀볶음",
-"중식 계란탕",
-"산라탕",
-"유린새우",
-"유린생선",
-"중식 생선조림",
-"깐풍가지",
-"가지튀김",
-"고기완자",
-"사자머리 완자",
-"고기만두",
-"군만두",
-"물만두",
-"마파만두",
-"중식 탕수육",
-"흑초 탕수육",
-"깐풍육",
-"사천식 소고기 볶음",
-"소고기 굴소스 볶음",
-"돼지고기 굴소스 볶음",
-"닭고기 캐슈넛 볶음",
-"중식 닭튀김",
-"중식 닭조림",
-"차슈",
-"차슈덮밥",
-"중국식 삼겹살 볶음",
-"회과육",
-"경장육슬",
-"북경오리 (팬 버전)",
-"중식 오리볶음",
-"중식 양갈비 볶음",
-"중식 양고기 볶음",
-"중식 전골",
-"훠궈",
-"백탕 훠궈",
-"홍탕 훠궈",
-"중식 두부튀김",
-"두부 굴소스 볶음",
-"해물 두부조림",
-"중식 해물찜",
-"꽃게 볶음",
-"깐풍게",
-"중식 새우볶음",
-"마늘새우 볶음",
-"흑후추 소고기",
-"흑후추 닭고기",
-"흑후추 돼지고기",
-"중식 스테이크",
-"중식 감자볶음",
-"산초 감자볶음",
-"중식 가지덮밥",
-"중식 볶음덮밥",
-"사천식 볶음국수",
-"중식 냉면",
-"중식 비빔냉면",
-"중식 오징어볶음",
-"중식 해물볶음",
-"중식 닭날개 튀김",
-"중식 닭날개 조림",
-"고추장 닭조림",
-"백숙",
-"감자전",
-"모듬전",
-"모리아와세",
-"일식 오믈렛",
-"돼지곰탕",
-"물회",
-"스시",
-"무시즈시",
-"김밥",
-"오니기리",
-"두부김치",
-"닭발",
-"족발",
-"보쌈",
-"계란찜",
-"햄버거",
-"피자",
-"후라이드 치킨",
-"궁보계정"
-]; // ← 여기에 300개 넣으면 됨
+const list = document.getElementById("menu-list");
 
-
-const canvas=document.getElementById("canvas");
-const ctx=canvas.getContext("2d");
-
-const cx=250;
-const cy=250;
-const radius=200;
-
-let offset=0;
-let speed=0;
-let spinning=false;
-
-function draw(){
-
-    ctx.clearRect(0,0,500,500);
-
-    // 원판
-    ctx.beginPath();
-    ctx.arc(cx,cy,radius,0,Math.PI*2);
-    ctx.fillStyle="#1f3a5f";
-    ctx.fill();
-
-    // 창 (30도 영역)
-    ctx.save();
-
-    ctx.translate(cx,cy);
-    ctx.rotate(-Math.PI/6);
-
-    ctx.beginPath();
-    ctx.moveTo(0,-radius);
-    ctx.arc(0,0,radius,-Math.PI/12,Math.PI/12);
-    ctx.lineTo(0,0);
-    ctx.fillStyle="gold";
-    ctx.fill();
-
-    ctx.restore();
-
-    // 메뉴 텍스트 흐름
-    ctx.save();
-
-    ctx.translate(cx,cy);
-
-    ctx.rotate(-Math.PI/6);
-
-    ctx.fillStyle="white";
-    ctx.font="24px Arial";
-    ctx.textAlign="center";
-
-    let spacing=40;
-
-    for(let i=-10;i<10;i++){
-
-        let index=Math.floor((offset/spacing+i))%foods.length;
-
-        if(index<0) index+=foods.length;
-
-        let y=i*spacing+(offset%spacing);
-
-        ctx.fillText(foods[index],0,y);
-    }
-
-    ctx.restore();
+let extendedMenus = [];
+for(let i=0;i<20;i++){
+    extendedMenus = extendedMenus.concat(menus);
 }
 
-function spin(){
+extendedMenus.forEach(menu=>{
+    const div=document.createElement("div");
+    div.className="menu-item";
+    div.innerText=menu;
+    list.appendChild(div);
+});
+
+let spinning=false;
+
+function playSpinSound(duration=5000){
+    const ctx=new AudioContext();
+    const osc=ctx.createOscillator();
+    const gain=ctx.createGain();
+
+    osc.type="triangle";
+    osc.frequency.setValueAtTime(100, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(40, ctx.currentTime+duration/1000);
+
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime+duration/1000);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start();
+    osc.stop(ctx.currentTime+duration/1000);
+}
+
+function playWinSound(){
+    const ctx=new AudioContext();
+
+    const osc=ctx.createOscillator();
+    const gain=ctx.createGain();
+
+    osc.type="sine";
+    osc.frequency.setValueAtTime(800, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime+0.3);
+
+    gain.gain.setValueAtTime(0.5, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime+1);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start();
+    osc.stop(ctx.currentTime+1);
+}
+
+function start(){
 
     if(spinning) return;
 
     spinning=true;
 
-    document.getElementById("spinSound").play();
+    playSpinSound(5000);
 
-    let duration=5000;
-    let start=null;
+    const itemHeight=80;
+    const total=menus.length;
+    const winnerIndex=Math.floor(Math.random()*total);
 
-    let maxSpeed=30;
+    const stopIndex=winnerIndex+(menus.length*10);
 
-    function animate(time){
+    const stopPosition=stopIndex*itemHeight;
 
-        if(!start) start=time;
-
-        let progress=time-start;
-
-        let percent=progress/duration;
-
-        speed=maxSpeed*(1-percent);
-
-        offset+=speed;
-
-        draw();
-
-        if(progress<duration){
-
-            requestAnimationFrame(animate);
-
-        }else{
-
-            finish();
-        }
-    }
-
-    requestAnimationFrame(animate);
-}
-
-function finish(){
-
-    spinning=false;
-
-    document.getElementById("spinSound").pause();
-    document.getElementById("spinSound").currentTime=0;
-
-    let spacing=40;
-
-    let index=Math.floor(offset/spacing)%foods.length;
-
-    if(index<0) index+=foods.length;
-
-    let selected=foods[index];
-
-    const result=document.getElementById("result");
-
-    result.innerText=selected;
-
-    result.classList.add("flash");
-
-    document.getElementById("winSound").play();
+    list.style.transition="transform 5s cubic-bezier(.1,.7,.1,1)";
+    list.style.transform=`translateY(-${stopPosition}px)`;
 
     setTimeout(()=>{
-        result.classList.remove("flash");
-    },3000);
+        const items=document.querySelectorAll(".menu-item");
+
+        items.forEach(i=>i.classList.remove("winner"));
+
+        items[stopIndex].classList.add("winner");
+
+        playWinSound();
+
+        spinning=false;
+
+    },5000);
+
 }
-
-draw();
-
 </script>
 
 </body>
