@@ -44,17 +44,15 @@ h1{
 
 }
 
-.menu-item{
-
-    height:80px;
-    line-height:80px;
-    font-size:28px;
+.menu-item {
+    height: 80px;
+    line-height: 80px;
+    font-size: 28px;
+    transition: all 0.3s;
 
     display:flex;
     align-items:center;
     justify-content:center;
-
-    transition:all 0.3s;
 }
 
 button{
@@ -221,49 +219,46 @@ osc.stop(ctx.currentTime+0.5);
 /* 시작 */
 function start(){
 
-if(spinning) return;
+    if(spinning) return;
 
-spinning=true;
+    spinning=true;
 
-playSpinSound(duration);
+    playSpinSound(duration);
 
-const randomIndex=Math.floor(Math.random()*menus.length);
+    const randomIndex = Math.floor(Math.random()*menus.length);
 
-const extraSpin=menus.length*(4+Math.random()*3);
+    const extraSpin = menus.length * (4 + Math.random()*3);
 
-const moveCount=extraSpin+randomIndex;
+    const winnerIndex = Math.floor(currentOffset/itemHeight) + extraSpin + randomIndex;
 
-const targetOffset=currentOffset+(moveCount*itemHeight);
+    /* 당첨 메뉴를 정확히 중앙에 위치시키는 offset */
+    const finalOffset = (winnerIndex * itemHeight) - ((containerHeight/2) - (itemHeight/2));
 
-const finalOffset=targetOffset-centerOffset;
+    list.style.transition = `transform ${duration}ms cubic-bezier(.17,.67,.25,1)`;
 
-list.style.transition=`transform ${duration}ms cubic-bezier(.17,.67,.25,1)`;
+    list.style.transform = `translateY(-${finalOffset}px)`;
 
-list.style.transform=`translateY(-${finalOffset}px)`;
+    setTimeout(()=>{
 
+        const items=document.querySelectorAll(".menu-item");
 
-setTimeout(()=>{
+        items.forEach(i=>i.classList.remove("winner"));
 
-const items=document.querySelectorAll(".menu-item");
+        items[winnerIndex].classList.add("winner");
 
-items.forEach(i=>i.classList.remove("winner"));
+        currentOffset = winnerIndex * itemHeight;
 
-const winnerIndex=Math.floor(targetOffset/itemHeight);
+        playWinSound();
 
-items[winnerIndex].classList.add("winner");
+        spinning=false;
 
-currentOffset=targetOffset;
-
-playWinSound();
-
-spinning=false;
-
-},duration);
+    },duration);
 
 }
-
+    
 </script>
 
 </body>
 </html>
+
 
