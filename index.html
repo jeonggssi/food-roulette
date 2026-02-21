@@ -5,265 +5,194 @@
 <title>랜덤 요리 뽑기</title>
 
 <style>
-
-body{
+body {
     background: radial-gradient(circle, #1a1a1a, #000);
-    color:white;
+    color: white;
     font-family: Arial;
-    text-align:center;
+    text-align: center;
 }
 
-h1{
-    margin-top:30px;
-    font-size:42px;
-    letter-spacing:3px;
+h1 {
+    margin-top: 30px;
+    font-size: 42px;
+    letter-spacing: 3px;
 }
 
-#roulette-container{
-
-    position:relative;
-    width:300px;
-    height:80px;
-    margin:50px auto;
-    overflow:hidden;
-
-    border:3px solid gold;
-    border-radius:12px;
-
-    background:black;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
+#roulette-container {
+    position: relative;
+    width: 300px;
+    height: 80px;
+    margin: 50px auto;
+    overflow: hidden;
+    border: 3px solid gold;
+    border-radius: 10px;
+    background: black;
 }
 
-#menu-list{
-
-    position:absolute;
-    width:100%;
-
+/* 메뉴 리스트 */
+#menu-list {
+    position: absolute;
+    width: 100%;
 }
 
-.menu-item{
-
-    height:80px;
-    line-height:80px;
-    font-size:28px;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
-    transition:all 0.3s;
+.menu-item {
+    height: 80px;
+    line-height: 80px;
+    font-size: 28px;
 }
 
-button{
-
-    font-size:24px;
-    padding:15px 40px;
-
-    background:gold;
-    border:none;
-    border-radius:10px;
-    cursor:pointer;
+/* 포인터 삼각형 (30도) */
+#pointer {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%) rotate(30deg);
+    width: 0;
+    height: 0;
+    border-left: 20px solid transparent;
+    border-right: 20px solid transparent;
+    border-bottom: 40px solid red;
+    z-index: 10;
 }
 
-button:hover{
-    background:orange;
+/* 버튼 */
+button {
+    font-size: 24px;
+    padding: 15px 40px;
+    background: gold;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
 }
 
-.winner{
-
-    font-size:46px !important;
-
-    color:gold;
-
-    font-weight:bold;
-
-    text-shadow:
-        0 0 10px gold,
-        0 0 20px orange,
-        0 0 40px yellow;
-
-    transform:scale(1.25);
-
+button:hover {
+    background: orange;
 }
 
+/* 결과 강조 */
+.winner {
+    font-size: 42px !important;
+    color: gold;
+    font-weight: bold;
+    text-shadow: 0 0 20px gold;
+}
 </style>
+
 </head>
 <body>
 
 <h1>랜덤 요리 뽑기</h1>
 
 <div id="roulette-container">
+    <div id="pointer"></div>
     <div id="menu-list"></div>
 </div>
 
 <button onclick="start()">START</button>
 
 <script>
-
-const duration = 3500;
-
 const menus = [
-
-"김치찌개",
-"스테이크",
-"파스타",
-"초밥",
-"치킨",
-"라멘",
-"삼겹살",
-"카레",
-"햄버거",
-"샤브샤브"
-
+    "김치찌개",
+    "스테이크",
+    "파스타",
+    "초밥",
+    "치킨",
+    "라멘",
+    "삼겹살",
+    "카레",
+    "햄버거",
+    "샤브샤브"
 ];
 
-const list=document.getElementById("menu-list");
+const list = document.getElementById("menu-list");
 
-let extendedMenus=[];
-
-for(let i=0;i<50;i++){
-
-extendedMenus=extendedMenus.concat(menus);
-
+let extendedMenus = [];
+for(let i=0;i<20;i++){
+    extendedMenus = extendedMenus.concat(menus);
 }
 
 extendedMenus.forEach(menu=>{
-
-const div=document.createElement("div");
-
-div.className="menu-item";
-
-div.innerText=menu;
-
-list.appendChild(div);
-
+    const div=document.createElement("div");
+    div.className="menu-item";
+    div.innerText=menu;
+    list.appendChild(div);
 });
 
 let spinning=false;
 
-let currentOffset=0;
+function playSpinSound(duration=5000){
+    const ctx=new AudioContext();
+    const osc=ctx.createOscillator();
+    const gain=ctx.createGain();
 
-const itemHeight=80;
+    osc.type="triangle";
+    osc.frequency.setValueAtTime(100, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(40, ctx.currentTime+duration/1000);
 
-const containerHeight=80;
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime+duration/1000);
 
-const centerOffset=(containerHeight/2)-(itemHeight/2);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
 
-
-
-/* 부드러운 슬롯머신 회전음 */
-function playSpinSound(duration=3500){
-
-const ctx=new AudioContext();
-
-let startTime=ctx.currentTime;
-
-function tick(){
-
-let now=ctx.currentTime;
-
-let progress=(now-startTime)/(duration/1000);
-
-if(progress>=1) return;
-
-const osc=ctx.createOscillator();
-const gain=ctx.createGain();
-
-osc.type="sine";
-
-osc.frequency.value=120 + (1-progress)*60;
-
-gain.gain.value=0.08*(1-progress);
-
-osc.connect(gain);
-gain.connect(ctx.destination);
-
-osc.start();
-osc.stop(now+0.08);
-
-requestAnimationFrame(tick);
-
+    osc.start();
+    osc.stop(ctx.currentTime+duration/1000);
 }
 
-tick();
-
-}
-
-
-
-/* 당첨음 */
 function playWinSound(){
+    const ctx=new AudioContext();
 
-const ctx=new AudioContext();
+    const osc=ctx.createOscillator();
+    const gain=ctx.createGain();
 
-const osc=ctx.createOscillator();
+    osc.type="sine";
+    osc.frequency.setValueAtTime(800, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime+0.3);
 
-const gain=ctx.createGain();
+    gain.gain.setValueAtTime(0.5, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime+1);
 
-osc.type="sine";
+    osc.connect(gain);
+    gain.connect(ctx.destination);
 
-osc.frequency.setValueAtTime(600,ctx.currentTime);
-
-osc.frequency.exponentialRampToValueAtTime(1200,ctx.currentTime+0.4);
-
-gain.gain.value=0.3;
-
-osc.connect(gain);
-gain.connect(ctx.destination);
-
-osc.start();
-
-osc.stop(ctx.currentTime+0.5);
-
+    osc.start();
+    osc.stop(ctx.currentTime+1);
 }
 
-
-
-/* 시작 */
 function start(){
 
     if(spinning) return;
 
     spinning=true;
 
-    playSpinSound(duration);
+    playSpinSound(5000);
 
-    const randomIndex = Math.floor(Math.random()*menus.length);
+    const itemHeight=80;
+    const total=menus.length;
+    const winnerIndex=Math.floor(Math.random()*total);
 
-    const extraSpin = menus.length * (4 + Math.random()*3);
+    const stopIndex=winnerIndex+(menus.length*10);
 
-    const winnerIndex = Math.floor(currentOffset/itemHeight) + extraSpin + randomIndex;
+    const stopPosition=stopIndex*itemHeight;
 
-    /* 당첨 메뉴를 정확히 중앙에 위치시키는 offset */
-    const finalOffset = (winnerIndex * itemHeight) - ((containerHeight/2) - (itemHeight/2));
-
-    list.style.transition = `transform ${duration}ms cubic-bezier(.17,.67,.25,1)`;
-
-    list.style.transform = `translateY(-${finalOffset}px)`;
+    list.style.transition="transform 5s cubic-bezier(.1,.7,.1,1)";
+    list.style.transform=`translateY(-${stopPosition}px)`;
 
     setTimeout(()=>{
-
         const items=document.querySelectorAll(".menu-item");
 
         items.forEach(i=>i.classList.remove("winner"));
 
-        items[winnerIndex].classList.add("winner");
-
-        currentOffset = winnerIndex * itemHeight;
+        items[stopIndex].classList.add("winner");
 
         playWinSound();
 
         spinning=false;
 
-    },duration);
+    },5000);
 
 }
-
 </script>
 
 </body>
 </html>
-
