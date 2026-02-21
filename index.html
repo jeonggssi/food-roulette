@@ -39,6 +39,10 @@ h1 {
     line-height: 80px;
     font-size: 28px;
     transition: all 0.3s;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
 }
 
 button {
@@ -109,6 +113,10 @@ extendedMenus.forEach(menu=>{
 let spinning=false;
 let currentOffset=0;
 
+const duration = 3500;
+const itemHeight = 80;
+const containerHeight = 80;
+    
 /* 밝고 경쾌한 슬롯머신 회전음 */
 function playSpinSound(duration=3500){
     const ctx=new AudioContext();
@@ -194,4 +202,5 @@ function start(){
 
 </body>
 </html>
+
 
