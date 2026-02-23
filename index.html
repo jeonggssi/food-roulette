@@ -446,7 +446,7 @@ extendedMenus.forEach(menu=>{
     list.appendChild(div);
 });
 
-function playSpinSound(duration = 3500){
+function playSpinSound(duration = 3000){
 
     const ctx = new AudioContext();
 
@@ -531,7 +531,7 @@ function start(){
 
     spinning = true;
 
-    playSpinSound(3500);
+    playSpinSound(3000);
 
     const itemHeight = 80;
     const containerHeight = document.getElementById("roulette-container").offsetHeight;
@@ -541,7 +541,7 @@ function start(){
     const totalItems = document.querySelectorAll(".menu-item").length;
 
     // const winnerIndex = Math.floor(Math.random() * total);
-    const winnerIndex = 98;
+    const winnerIndex = 330;
 
     // 최소 3바퀴 + 랜덤 0~2바퀴
     const minLoops = 3;
@@ -575,13 +575,14 @@ function start(){
 
         spinning = false;
 
-    },3500);
+    },3000);
 
 }
 </script>
 
 </body>
 </html>
+
 
 
 
