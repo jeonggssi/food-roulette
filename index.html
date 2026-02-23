@@ -556,7 +556,7 @@ function start(){
     const maxHeight = totalItems * itemHeight;
     currentPosition = currentPosition % maxHeight;
 
-    list.style.transition = "transform 3.5s cubic-bezier(.1,.7,.1,1)";
+    list.style.transition = "transform 3s cubic-bezier(.1,.7,.1,1)";
     list.style.transform =
         `translateY(-${currentPosition - centerOffset}px)`;
 
@@ -582,6 +582,7 @@ function start(){
 
 </body>
 </html>
+
 
 
 
