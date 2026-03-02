@@ -47,7 +47,7 @@ h1 {
 
 /* 버튼 */
 button {
-    font-size: 30px;
+    font-size: 0px;
     font-weight: bold;
     padding: 15px 40px;
     background: gold;
@@ -446,7 +446,7 @@ extendedMenus.forEach(menu=>{
     list.appendChild(div);
 });
 
-function playSpinSound(duration = 3000){
+function playSpinSound(duration = 3500){
 
     const ctx = new AudioContext();
 
@@ -508,7 +508,7 @@ function playWinSound(){
         osc.type = "sine";
         osc.frequency.setValueAtTime(freq, ctx.currentTime + i*0.12);
 
-        gain.gain.setValueAtTime(0.3, ctx.currentTime + i*0.12);
+        gain.gain.setValueAtTime(0.35, ctx.currentTime + i*0.12);
         gain.gain.exponentialRampToValueAtTime(
             0.001,
             ctx.currentTime + i*0.12 + 0.4
@@ -531,7 +531,7 @@ function start(){
 
     spinning = true;
 
-    playSpinSound(3000);
+    playSpinSound(3500);
 
     const itemHeight = 80;
     const containerHeight = document.getElementById("roulette-container").offsetHeight;
@@ -574,13 +574,14 @@ function start(){
 
         spinning = false;
 
-    },3000);
+    },3500);
 
 }
 </script>
 
 </body>
 </html>
+
 
 
 
